@@ -17,14 +17,12 @@ class InfoMessage:
 
     def get_message(self) -> str:
         return self.INFO.format(**asdict(self))
-    
 
 
 class Training:
     """Базовый класс тренировки."""
     M_IN_KM = 1000
     LEN_STEP = 0.65
-    distance = ''
 
     def __init__(self,
                  action: int,
@@ -57,7 +55,6 @@ class Training:
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-
         speed = self.get_mean_speed()
         calories = self.get_spent_calories()
         distance = self.get_distance()
@@ -79,6 +76,7 @@ class Running(Training):
                          weight)
 
     def get_spent_calories(self) -> float:
+        """Получить количество затраченных калорий."""
         sr_speed = Training.get_mean_speed(self)
         calories = ((18 * sr_speed - 20)
                     * self.weight / self.M_IN_KM * (self.duration * 60))
