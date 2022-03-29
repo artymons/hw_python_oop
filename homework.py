@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import ClassVar, Dict, List, Tuple, Type, Union
+from typing import ClassVar, Dict, List, Type
 
 
 @dataclass
@@ -11,13 +11,12 @@ class InfoMessage:
     distance: float
     duration: float
     calories: float
-    INFO: (ClassVar
-           [Tuple[Union
-            [str, float], ...]]) = ('Тип тренировки: {training_type}; '
-                                    'Длительность: {duration:.3f} ч.; '
-                                    'Дистанция: {distance:.3f} км; '
-                                    'Ср. скорость: {speed:.3f} км/ч; '
-                                    'Потрачено ккал: {calories:.3f}.')
+
+    INFO: ClassVar[str] = ('Тип тренировки: {training_type}; '
+                           'Длительность: {duration:.3f} ч.; '
+                           'Дистанция: {distance:.3f} км; '
+                           'Ср. скорость: {speed:.3f} км/ч; '
+                           'Потрачено ккал: {calories:.3f}.')
 
     def get_message(self) -> str:
         """Возвращаем сообщение о тренировке."""
@@ -28,9 +27,13 @@ class InfoMessage:
 class Training:
     """Базовый класс тренировки."""
 
+    SWIM: ClassVar[str] = 'SWM'
+    RUNN: ClassVar[str] = 'RUN'
+    WALK: ClassVar[str] = 'WLK'
     M_IN_KM: ClassVar[float] = 1000
     LEN_STEP: ClassVar[float] = 0.65
     MIN_IN_HOUR: ClassVar[float] = 60
+
     action: int
     duration: float
     weight: float
@@ -46,7 +49,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError((self.__class__.__name__))
 
     def training_type(self) -> str:
         """Возвращает тип."""
@@ -84,6 +87,7 @@ class SportsWalking(Training):
 
     COEF_FOR_CAL_WALK_1: ClassVar[float] = 0.035
     COEF_FOR_CAL_WALK_2: ClassVar[float] = 0.029
+
     height: float
 
     def get_spent_calories(self) -> float:
@@ -102,12 +106,9 @@ class Swimming(Training):
     COEF_FOR_CAL_SWIM_1: ClassVar[float] = 1.1
     COEF_FOR_CAL_SWIM_2: ClassVar[float] = 2
     LEN_STEP: ClassVar[float] = 1.38
+
     length_pool: float
     count_pool: float
-
-    def get_distance(self) -> float:
-        """Получить дистанцию в км."""
-        return self.action * self.LEN_STEP / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
@@ -123,14 +124,13 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: List[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    type_dict: Dict[str, Type[Training]] = {'SWM': Swimming,
-                                            'RUN': Running,
-                                            'WLK': SportsWalking}
-    if workout_type in type_dict.keys():
-        type_dict[workout_type](*data)
-    else:
-        print(f'ValueError - {workout_type}. '
-              f'You can enter one of these values: {type_dict.keys()}')
+    type_dict: Dict[str, Type[Training]] = {Training.SWIM: Swimming,
+                                            Training.RUNN: Running,
+                                            Training.WALK: SportsWalking}
+    if workout_type not in type_dict.keys():
+        raise ValueError(f'Value = {workout_type}. '
+                         f'You can enter one of '
+                         f'these values: {list(type_dict)}')
     return type_dict[workout_type](*data)
 
 
